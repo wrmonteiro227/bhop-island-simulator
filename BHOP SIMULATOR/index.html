@@ -436,7 +436,7 @@
             loadRealisticModels() {
                 const gltfLoader = new GLTFLoader();
 
-                // Puxa o arquivo equipado no inventário (seja bracos_cs1 ou bracos_cs2)
+                // Determina qual modelo carregar baseado no sistema de equipamentos
                 const skinPath = localStorage.getItem('astro_skin_equipada') || './assets/models/bracos_cs1/scene.gltf';
 
                 // Remove modelo antigo para evitar sobreposição
@@ -446,17 +446,30 @@
                     skinPath,
                     (gltf) => {
                         this.currentModel = gltf.scene;
-                        const scaleFix = 0.5;
-                        this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
-                        this.currentModel.rotation.x = -0.15;
-                        this.currentModel.rotation.y = Math.PI;
-                        this.currentModel.rotation.z = 0;
-                        this.currentModel.position.set(0.0, -0.6, 2.5);
+
+                        // --- LÓGICA DE INDIVIDUALISMO POR PASTA ---
+                        if (skinPath.includes('bracos_cs2')) {
+                            // AJUSTE DO BRAÇO 2 (Começa bem na frente para você regular)
+                            const scaleFix = 1.2; // Escala aumentada para visibilidade inicial
+                            this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
+                            this.currentModel.rotation.set(-0.1, Math.PI, 0);
+                            // Z em 0.5 está bem na "lente". Aumente para 2.5, 3.5 etc para jogar para trás.
+                            this.currentModel.position.set(0.1, -1.0, 0.5); 
+                        } else {
+                            // AJUSTE CONSOLIDADO DO BRAÇO 1
+                            const scaleFix = 0.5;
+                            this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
+                            this.currentModel.rotation.x = -0.15;
+                            this.currentModel.rotation.y = Math.PI;
+                            this.currentModel.rotation.z = 0;
+                            this.currentModel.position.set(0.0, -0.6, 2.5);
+                        }
 
                         this.currentModel.traverse((child) => {
                             if (child.isMesh) {
                                 child.castShadow = true;
                                 child.receiveShadow = true;
+                                child.frustumCulled = false; // Essencial para o braço não sumir
                                 if (child.material) {
                                     child.material.side = THREE.DoubleSide;
                                     child.material.depthTest = true;
@@ -512,7 +525,7 @@
         const viewmodel = new Viewmodel(camera);
 
         // ==========================================
-        // 3. LEVEL DESIGN E TEXTURAS PBR
+        // 3. LEVEL DESIGN E TEXTURAS PBR (CONTINUAÇÃO EXATA DO SEU CÓDIGO...)
         // ==========================================
         const blocksAABB = [];
         const textureLoader = new THREE.TextureLoader();
