@@ -1,0 +1,895 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHOP ISLAND SIMULATOR</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB; /* Azul Céu Tropical */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        /* --- MENU INICIAL ESTILO CS2 --- */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(40, 50, 70, 0.4) 0%, rgba(10, 15, 25, 0.9) 100%), url('https://images.alphacoders.com/133/1331343.png'); /* Fundo temático opcional */
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            color: #ffffff;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        /* Navbar Superior */
+        #top-nav {
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 40px;
+        }
+
+        .nav-item {
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            color: #aaa;
+            transition: 0.2s;
+            letter-spacing: 1px;
+        }
+
+            .nav-item:hover, .nav-item.active {
+                color: #fff;
+                text-shadow: 0 0 10px #fff;
+            }
+
+        /* Conteúdo Central */
+        #menu-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 100px;
+        }
+
+        #main-brand h1 {
+            font-size: 80px;
+            margin: 0;
+            font-style: italic;
+            font-weight: 900;
+            line-height: 0.9;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        }
+
+        /* Painel de Perfil (Direita) */
+        #profile-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background: #555;
+            border: 2px solid #00ffff;
+        }
+
+        .stats-preview {
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+        }
+
+        .btn-play {
+            background: #de9b35;
+            color: black;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+            transition: 0.3s;
+            margin-top: 40px;
+        }
+
+            .btn-play:hover {
+                background: #ffb444;
+                transform: scale(1.05);
+            }
+
+        /* --- MODAIS (ADICIONADOS) --- */
+        .modal-screen {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 850px;
+            height: 550px;
+            background: rgba(10, 15, 25, 0.98);
+            border: 1px solid #de9b35;
+            z-index: 150;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        .grid-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            overflow-y: auto;
+            max-height: 420px;
+            padding-right: 10px;
+        }
+
+        .item-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+            .item-card:hover {
+                background: rgba(222, 155, 53, 0.1);
+            }
+
+        .rarity-gold {
+            border-bottom: 4px solid #de9b35;
+        }
+
+        .rarity-red {
+            border-bottom: 4px solid #eb4b4b;
+        }
+
+        .buy-btn {
+            background: #de9b35;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 10px;
+            color: black;
+        }
+
+        /* --- HUD --- */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Cronômetro Superior */
+        #timer-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 20px;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 24px;
+            font-family: monospace;
+            border-left: 4px solid #de9b35;
+        }
+
+        /* Painel de Velocidade e Status (Esquerda Inferior) */
+        #status-panel {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            color: white;
+            text-shadow: 2px 2px 4px black;
+        }
+
+        #speed-container {
+            font-size: 48px;
+            font-weight: 900;
+            font-style: italic;
+        }
+
+        .sub-stats {
+            font-size: 18px;
+            color: #00ffff;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background-color: #00ff00;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        /* --- FEEDBACK DINHEIRO POPUP --- */
+        .money-popup {
+            position: absolute;
+            color: #00ff00;
+            font-weight: 900;
+            font-size: 26px;
+            text-shadow: 2px 2px 4px black;
+            pointer-events: none;
+            animation: astroFloatUp 1.2s ease-out forwards;
+            z-index: 200;
+            font-style: italic;
+        }
+
+        @keyframes astroFloatUp {
+            0% {
+                transform: translate(-50%, 0);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -120px);
+                opacity: 0;
+            }
+        }
+
+        /* Rodapé do Menu */
+        #footer-menu {
+            height: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <div id="top-nav">
+            <div class="nav-item active" id="nav-jogar">Jogar</div>
+            <div class="nav-item" id="nav-inventario">Inventário</div>
+            <div class="nav-item" id="nav-loja">Loja</div>
+            <div class="nav-item">Configurações</div>
+        </div>
+
+        <div id="menu-content">
+            <div id="main-brand">
+                <p style="margin:0; color:#de9b35; font-weight:bold; letter-spacing: 5px;">BETA 1.1</p>
+                <h1>BHOP<br>ISLAND SIMULATOR</h1>
+                <button class="btn-play" id="start-btn">Iniciar Sofrimento</button>
+            </div>
+
+            <div id="profile-panel">
+                <div class="user-info">
+                    <div class="avatar"></div>
+                    <div>
+                        <div style="font-weight:bold; font-size:18px;">Tony Stark</div>
+                        <div style="color:#de9b35; font-size:12px;">Global Elite</div>
+                    </div>
+                </div>
+                <div class="stats-preview">
+                    <p id="inv-count-label">Itens no Inventário: 0</p>
+                    <p id="saldo-label">Saldo: R$ 0,00</p>
+                    <p>Melhor Tempo: --:--</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-loja" class="modal-screen">
+            <h2 style="color:#de9b35; font-style: italic; margin-top:0;">LOJA DE SKINS</h2>
+            <div id="lista-loja" class="grid-items"></div>
+            <button class="buy-btn" style="background:#444; color:white; margin-top:20px;" id="btn-fechar-loja">VOLTAR</button>
+        </div>
+
+        <div id="modal-inventario" class="modal-screen">
+            <h2 style="color:#de9b35; font-style: italic; margin-top:0;">MEU INVENTÁRIO</h2>
+            <div id="lista-inventario" class="grid-items"></div>
+            <button class="buy-btn" style="background:#444; color:white; margin-top:20px;" id="btn-fechar-inv">VOLTAR</button>
+        </div>
+
+        <div id="footer-menu">
+            V. 1.1.0-TROPICAL | POWERED BY ASTRO ENGINE
+        </div>
+    </div>
+
+    <div id="game-container"></div>
+
+    <div id="hud">
+        <div id="timer-container">00:00.00</div>
+
+        <div id="status-panel">
+            <div class="sub-stats">Fase: <span id="fase-id">1</span></div>
+            <div id="speed-container"><span id="speed-value">0</span> <small style="font-size: 20px;">u/s</small></div>
+            <div class="sub-stats">Sync: <span id="sync-value">0</span> jumps</div>
+        </div>
+
+        <div id="crosshair"></div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // IMPORT DOS MODULOS DE ECONOMIA E TRACKER
+        import { Economia } from './economia.js';
+        import { Inventario } from './inventario.js';
+        import { renderizarLoja } from './loja.js';
+        import { AstroTracker } from './astro_tracker.js';
+
+        // --- FUNÇÃO FEEDBACK VISUAL ---
+        window.mostrarGanhoAstro = (valor) => {
+            const popup = document.createElement('div');
+            popup.className = 'money-popup';
+            popup.style.left = '50%'; popup.style.top = '60%';
+            popup.innerText = `+ R$ ${valor.toFixed(2)}`;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1200);
+        };
+
+        // ==========================================
+        // 1. CONFIGURAÇÃO BASE (ILUMINAÇÃO TROPICAL)
+        // ==========================================
+        const container = document.getElementById('game-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.FogExp2(0x87CEEB, 0.0012);
+
+        const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 2500);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xfff5b6, 3.5);
+        sunLight.position.set(150, 300, 100);
+        sunLight.castShadow = true;
+        sunLight.shadow.camera.top = 200;
+        sunLight.shadow.camera.bottom = -200;
+        sunLight.shadow.camera.left = -200;
+        sunLight.shadow.camera.right = 200;
+        scene.add(sunLight);
+
+        // ==========================================
+        // 2. ARQUITETURA VIEWMODEL (INJEÇÃO DE GLTF - CONSOLIDADO)
+        // ==========================================
+        class Viewmodel {
+            constructor(camera) {
+                this.group = new THREE.Group();
+                this.camera = camera;
+                this.currentModel = null;
+
+                const viewmodelLight = new THREE.PointLight(0xffffff, 1.5, 5);
+                viewmodelLight.position.set(0, 0.5, 1);
+                this.group.add(viewmodelLight);
+
+                this.loadRealisticModels();
+
+                this.camera.add(this.group);
+                scene.add(this.camera);
+            }
+
+            loadRealisticModels() {
+                const gltfLoader = new GLTFLoader();
+
+                // Determina qual modelo carregar baseado no sistema de equipamentos
+                const skinPath = localStorage.getItem('astro_skin_equipada') || './assets/models/bracos_cs1/scene.gltf';
+
+                // Remove modelo antigo para evitar sobreposição
+                if (this.currentModel) this.group.remove(this.currentModel);
+
+                gltfLoader.load(
+                    skinPath,
+                    (gltf) => {
+                        this.currentModel = gltf.scene;
+                        const scaleFix = 0.5;
+                        this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
+                        this.currentModel.rotation.x = -0.15;
+                        this.currentModel.rotation.y = Math.PI;
+                        this.currentModel.rotation.z = 0;
+                        this.currentModel.position.set(0.0, -0.6, 2.5);
+
+                        this.currentModel.traverse((child) => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                                if (child.material) {
+                                    child.material.side = THREE.DoubleSide;
+                                    child.material.depthTest = true;
+                                }
+                            }
+                        });
+
+                        this.group.add(this.currentModel);
+                    },
+                    (xhr) => { },
+                    (error) => {
+                        this.setupFallback();
+                    }
+                );
+            }
+
+            setupFallback() {
+                this.gloveMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 1.0 });
+                const forearmGeo = new THREE.CylinderGeometry(0.04, 0.03, 0.4, 16);
+                forearmGeo.rotateX(Math.PI / 2);
+                const handGeo = new THREE.BoxGeometry(0.08, 0.08, 0.12);
+
+                const armGroupL = new THREE.Group();
+                const leftForearm = new THREE.Mesh(forearmGeo, this.gloveMaterial);
+                leftForearm.position.set(0, 0, -0.2);
+                const handL = new THREE.Mesh(handGeo, this.gloveMaterial);
+                handL.position.set(0, 0, -0.45);
+                armGroupL.add(leftForearm); armGroupL.add(handL);
+                armGroupL.position.set(-0.35, -0.3, -0.3); armGroupL.rotation.y = Math.PI / 8;
+                this.group.add(armGroupL);
+
+                const armGroupR = new THREE.Group();
+                const rightForearm = new THREE.Mesh(forearmGeo, this.gloveMaterial);
+                rightForearm.position.set(0, 0, -0.2);
+                const handR = new THREE.Mesh(handGeo, this.gloveMaterial);
+                handR.position.set(0, 0, -0.45);
+                armGroupR.add(rightForearm); armGroupR.add(handR);
+                armGroupR.position.set(0.35, -0.3, -0.3); armGroupR.rotation.y = -Math.PI / 8;
+                this.group.add(armGroupR);
+            }
+
+            updateSway(velocity, isGrounded) {
+                const speed = Math.min(Math.sqrt(velocity.x ** 2 + velocity.z ** 2), 20);
+                if (isGrounded && speed > 0.1) {
+                    const time = performance.now() * 0.01;
+                    this.group.position.y = Math.sin(time) * 0.005 * speed;
+                    this.group.position.x = Math.cos(time * 0.5) * 0.005 * speed;
+                } else {
+                    this.group.position.lerp(new THREE.Vector3(0, 0, 0), 0.1);
+                }
+            }
+        }
+        const viewmodel = new Viewmodel(camera);
+
+        // ==========================================
+        // 3. LEVEL DESIGN E TEXTURAS PBR
+        // ==========================================
+        const blocksAABB = [];
+        const textureLoader = new THREE.TextureLoader();
+
+        // Variáveis de Controle de Spawn
+        let spawnPos = new THREE.Vector3(0, -2, 45);
+        let currentIslandId = 0; // 0 para primeira ilha, 1 para segunda ilha (checkpoint)
+
+        function getRealisticMaterial(type) {
+            const baseColor = type === 'wood' ? 0x4A3728 : 0x555555;
+            const material = new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.9 });
+
+            let colorPath = type === 'wood' ? './assets/textures/cobblestone.jpg' : './assets/textures/concrete_color.jpg';
+
+            textureLoader.load(colorPath, (tex) => {
+                tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+                material.map = tex;
+                material.color.setHex(0xffffff);
+                material.needsUpdate = true;
+            });
+
+            return material;
+        }
+
+        const matWood = getRealisticMaterial('wood');
+
+        function createSpecialPlatform(x, y, z, width, depth, islandId) {
+            const height = 8;
+            const geo = new THREE.BoxGeometry(width, height, depth);
+
+            const collisionMat = new THREE.MeshBasicMaterial({ visible: false });
+            const collisionBlock = new THREE.Mesh(geo, collisionMat);
+            collisionBlock.position.set(x, y, z);
+            collisionBlock.userData = { isIsland: true, id: islandId }; // Identifica para checkpoint
+            scene.add(collisionBlock);
+
+            const boundingBox = new THREE.Box3().setFromObject(collisionBlock);
+            blocksAABB.push(boundingBox);
+
+            const gltfLoader = new GLTFLoader();
+            const modelPath = './assets/models/ilha/scene.gltf';
+
+            gltfLoader.load(
+                modelPath,
+                (gltf) => {
+                    const model = gltf.scene;
+                    const scaleFix = 3000.0;
+                    model.scale.set(scaleFix, scaleFix, scaleFix);
+                    const alturaVisualOffset = -22;
+                    model.position.set(x, y + alturaVisualOffset, z);
+                    model.traverse((child) => {
+                        if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+                    });
+                    scene.add(model);
+                },
+                undefined,
+                (error) => {
+                    const fallbackMat = new THREE.MeshStandardMaterial({ color: 0xc2b280, roughness: 0.9, metalness: 0.0 });
+                    const fallbackBlock = new THREE.Mesh(geo, fallbackMat);
+                    fallbackBlock.position.set(x, y, z);
+                    fallbackBlock.receiveShadow = true; fallbackBlock.castShadow = true;
+                    scene.add(fallbackBlock);
+                }
+            );
+        }
+
+        function createBhopBlock(x, y, z, width, depth) {
+            const slabHeight = 2.0;
+            const geo = new THREE.BoxGeometry(width, slabHeight, depth);
+            const block = new THREE.Mesh(geo, matWood);
+
+            block.position.set(x, y + 2.5, z);
+            block.receiveShadow = true; block.castShadow = true;
+            scene.add(block);
+
+            const collisionGeo = new THREE.BoxGeometry(width, slabHeight, depth);
+            const collisionBlock = new THREE.Mesh(collisionGeo, new THREE.MeshBasicMaterial({ visible: false }));
+            collisionBlock.position.set(x, y + 2.5, z);
+            scene.add(collisionBlock);
+
+            const boundingBox = new THREE.Box3().setFromObject(collisionBlock);
+            blocksAABB.push(boundingBox);
+        }
+
+        // --- GERAÇÃO DO MAPA ---
+
+        // Fase 1: Início
+        createSpecialPlatform(0, -6, 80, 160, 80, 0);
+
+        let currentZ = 45;
+        let currentX = 0;
+        let currentY = -4;
+
+        for (let i = 0; i < 60; i++) {
+            let gap = 31.8;
+            let sideShift = (i % 2 === 0) ? -8.6 : 8.6;
+            let elevation = 0;
+
+            if (i === 0) { gap = 20; sideShift = -15; }
+
+            currentZ -= gap;
+            currentX = sideShift;
+            currentY += elevation;
+            createBhopBlock(currentX, currentY, currentZ, 14.4, 14.4);
+        }
+
+        // Ilha 2: Checkpoint e Início da Fase 2
+        const island2Pos = { x: currentX, y: currentY - 2, z: currentZ - 80 };
+        createSpecialPlatform(island2Pos.x, island2Pos.y, island2Pos.z, 200, 200, 1);
+
+        // Fase 2: Lajes Neon
+        createPhase2Content(island2Pos);
+
+        function createPhase2Content(island2Pos) {
+            const gltfLoader = new GLTFLoader();
+            const textModelPath = './assets/models/phase2_text.gltf';
+
+            gltfLoader.load(
+                textModelPath,
+                (gltf) => {
+                    const model = gltf.scene;
+                    const scaleFix = 20.0;
+                    model.scale.set(scaleFix, scaleFix, scaleFix);
+                    model.position.set(island2Pos.x, island2Pos.y + 60, island2Pos.z - 200);
+                    model.rotation.y = Math.PI;
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material = new THREE.MeshStandardMaterial({
+                                color: 0x00ffff,
+                                emissive: 0x00ffff,
+                                emissiveIntensity: 0.5,
+                                roughness: 0.1,
+                                metalness: 0.9,
+                            });
+                        }
+                    });
+                    scene.add(model);
+                }
+            );
+
+            const phase2Mat = new THREE.MeshStandardMaterial({
+                color: 0x00ffff,
+                emissive: 0x008080,
+                emissiveIntensity: 0.3,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+
+            currentZ = island2Pos.z - 60;
+            currentX = island2Pos.x + 35;
+            currentY = island2Pos.y + 4;
+
+            for (let i = 0; i < 50; i++) {
+                let gap = 34.0;
+                let sideShift = Math.sin(i * 0.5) * 15;
+                let elevation = 1.2;
+
+                currentZ -= gap;
+                currentX = (island2Pos.x + 35) + sideShift;
+                currentY += elevation;
+
+                const slabHeight = 2.0;
+                const geo = new THREE.BoxGeometry(12.0, slabHeight, 12.0);
+                const block = new THREE.Mesh(geo, phase2Mat);
+
+                block.position.set(currentX, currentY + 2.5, currentZ);
+                block.receiveShadow = true; block.castShadow = true;
+                scene.add(block);
+
+                const collisionGeo = new THREE.BoxGeometry(12.0, slabHeight, 12.0);
+                const collisionBlock = new THREE.Mesh(collisionGeo, new THREE.MeshBasicMaterial({ visible: false }));
+                collisionBlock.position.set(currentX, currentY + 2.5, currentZ);
+                scene.add(collisionBlock);
+
+                const boundingBox = new THREE.Box3().setFromObject(collisionBlock);
+                blocksAABB.push(boundingBox);
+            }
+
+            createSpecialPlatform(currentX, currentY - 2, currentZ - 100, 150, 150, 2);
+        }
+
+        // ==========================================
+        // 4. FÍSICA TICKRATE 64 & AABB SWEEPING
+        // ==========================================
+        const controls = new PointerLockControls(camera, document.body);
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
+
+        // HUD Elements
+        const speedHud = document.getElementById('speed-value');
+        const timerHud = document.getElementById('timer-container');
+        const syncHud = document.getElementById('sync-value');
+        const faseHud = document.getElementById('fase-id');
+
+        // INTEGRAÇÃO INTERFACE (MENUS)
+        const navJogar = document.getElementById('nav-jogar');
+        const navInv = document.getElementById('nav-inventario');
+        const navLoja = document.getElementById('nav-loja');
+        const modalLoja = document.getElementById('modal-loja');
+        const modalInv = document.getElementById('modal-inventario');
+
+        navLoja.onclick = () => { modalLoja.style.display = 'block'; modalInv.style.display = 'none'; renderizarLoja('lista-loja'); };
+        navInv.onclick = () => { modalInv.style.display = 'block'; modalLoja.style.display = 'none'; Inventario.renderizar('lista-inventario'); };
+        navJogar.onclick = () => { modalLoja.style.display = 'none'; modalInv.style.display = 'none'; };
+        document.getElementById('btn-fechar-loja').onclick = () => modalLoja.style.display = 'none';
+        document.getElementById('btn-fechar-inv').onclick = () => modalInv.style.display = 'none';
+
+        startBtn.addEventListener('click', () => controls.lock());
+        controls.addEventListener('lock', () => {
+            startScreen.style.display = 'none';
+            modalLoja.style.display = 'none';
+            modalInv.style.display = 'none';
+            startTime = performance.now();
+            isPlaying = true;
+        });
+        controls.addEventListener('unlock', () => {
+            startScreen.style.display = 'flex';
+            isPlaying = false;
+        });
+
+        const HEIGHT_STAND = 6.4; const HEIGHT_CROUCH = 4.6; const CROUCH_OFFSET = HEIGHT_STAND - HEIGHT_CROUCH;
+        let playerHeight = HEIGHT_STAND; const playerRadius = 1.6;
+        const playerPos = new THREE.Vector3(0, -2, 45);
+        const playerVel = new THREE.Vector3(0, 0, 0);
+
+        let isGrounded = false; let isCrouching = false; let isPlaying = false; let startTime = 0;
+        let jumpCount = 0;
+
+        const GRAVITY = 100; const JUMP_FORCE = 30; const MAX_SPEED = 25; const MAX_AIR_SPEED = 30; const ACCEL = 10; const AIR_ACCEL = 125; const FRICTION = 5.2; const STOP_SPEED = 10.0; const HARD_SPEED_LIMIT = 80.0;
+
+        const TICK_RATE = 64; const TICK_DT = 1.0 / TICK_RATE; let physicsAccumulator = 0.0;
+        const keys = { w: false, a: false, s: false, d: false, space: false, shift: false };
+        document.addEventListener('keydown', (e) => { if (e.code === 'KeyW') keys.w = true; if (e.code === 'KeyA') keys.a = true; if (e.code === 'KeyS') keys.s = true; if (e.code === 'KeyD') keys.d = true; if (e.code === 'Space') keys.space = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = true; });
+        document.addEventListener('keyup', (e) => { if (e.code === 'KeyW') keys.w = false; if (e.code === 'KeyA') keys.a = false; if (e.code === 'KeyS') keys.s = false; if (e.code === 'KeyD') keys.d = false; if (e.code === 'Space') keys.space = false; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = false; });
+
+        function PM_Friction(dt, isMovingInput) { let speed = Math.sqrt(playerVel.x ** 2 + playerVel.z ** 2); if (speed < 0.1) { playerVel.x = 0; playerVel.z = 0; return; } let drop = 0; if (isGrounded) { let frictionMultiplier = isMovingInput ? 1 : 1.5; let control = speed < STOP_SPEED ? STOP_SPEED : speed; drop = control * FRICTION * frictionMultiplier * dt; } let newSpeed = speed - drop; if (newSpeed < 0) newSpeed = 0; newSpeed /= speed; playerVel.x *= newSpeed; playerVel.z *= newSpeed; }
+        function PM_Accelerate(wishDir, wishSpeed, accel, dt) { let currentSpeed = playerVel.dot(wishDir); let addSpeed = wishSpeed - currentSpeed; if (addSpeed <= 0) return; let accelSpeed = accel * wishSpeed * dt; if (accelSpeed > addSpeed) accelSpeed = addSpeed; playerVel.x += wishDir.x * accelSpeed; playerVel.z += wishDir.z * accelSpeed; }
+
+        function collideAndSlide(axis) {
+            let epsilon = 0.01;
+            let pMinX = playerPos.x - playerRadius; let pMaxX = playerPos.x + playerRadius;
+            let pMinY = playerPos.y; let pMaxY = playerPos.y + playerHeight;
+            let pMinZ = playerPos.z - playerRadius; let pMaxZ = playerPos.z + playerRadius;
+
+            for (let i = 0; i < blocksAABB.length; i++) {
+                let box = blocksAABB[i];
+                if (pMaxX > box.min.x + epsilon && pMinX < box.max.x - epsilon && pMaxY > box.min.y + epsilon && pMinY < box.max.y - epsilon && pMaxZ > box.min.z + epsilon && pMinZ < box.max.z - epsilon) {
+
+                    // Lógica de Checkpoint consolidada
+                    for (let sceneChild of scene.children) {
+                        if (sceneChild.userData && sceneChild.userData.isIsland) {
+                            let islandBox = new THREE.Box3().setFromObject(sceneChild);
+                            if (islandBox.containsPoint(playerPos)) {
+                                if (sceneChild.userData.id > 0) {
+                                    spawnPos.set(playerPos.x, playerPos.y, playerPos.z);
+                                    faseHud.innerText = sceneChild.userData.id + 1;
+                                }
+                            }
+                        }
+                    }
+
+                    if (axis === 'x') {
+                        if (playerVel.x > 0) { playerPos.x = box.min.x - playerRadius - epsilon; }
+                        else if (playerVel.x < 0) { playerPos.x = box.max.x + playerRadius + epsilon; }
+                        playerVel.x = 0;
+                    } else if (axis === 'y') {
+                        if (playerVel.y > 0) { playerPos.y = box.min.y - playerHeight - epsilon; playerVel.y = 0; }
+                        else if (playerVel.y < 0) { playerPos.y = box.max.y; playerVel.y = 0; }
+                    } else if (axis === 'z') {
+                        if (playerVel.z > 0) { playerPos.z = box.min.z - playerRadius - epsilon; }
+                        else if (playerVel.z < 0) { playerPos.z = box.max.z + playerRadius + epsilon; }
+                        playerVel.z = 0;
+                    }
+                    pMinX = playerPos.x - playerRadius; pMaxX = playerPos.x + playerRadius; pMinY = playerPos.y; pMaxY = playerPos.y + playerHeight; pMinZ = playerPos.z - playerRadius; pMaxZ = playerPos.z + playerRadius;
+                }
+            }
+        }
+
+        function physicsStep(dt) {
+            const forward = new THREE.Vector3(); camera.getWorldDirection(forward); forward.y = 0; forward.normalize();
+            const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+            const wishDir = new THREE.Vector3(0, 0, 0);
+
+            if (isGrounded) {
+                if (keys.w) wishDir.add(forward); if (keys.s) wishDir.sub(forward);
+                if (keys.d) wishDir.add(right); if (keys.a) wishDir.sub(right);
+            } else {
+                if (keys.w) wishDir.add(forward); if (keys.s) wishDir.sub(forward);
+                if (keys.a && !keys.d) wishDir.sub(right);
+                if (keys.d && !keys.a) wishDir.add(right);
+            }
+
+            if (wishDir.lengthSq() > 0) wishDir.normalize();
+            if (keys.shift && !isCrouching) { isCrouching = true; playerHeight = HEIGHT_CROUCH; if (!isGrounded) playerPos.y += CROUCH_OFFSET; } else if (!keys.shift && isCrouching) { isCrouching = false; playerHeight = HEIGHT_STAND; if (!isGrounded) playerPos.y -= CROUCH_OFFSET; }
+
+            isGrounded = false;
+            let groundEpsilon = 0.05;
+            let pMinX = playerPos.x - playerRadius; let pMaxX = playerPos.x + playerRadius; let pMinZ = playerPos.z - playerRadius; let pMaxZ = playerPos.z + playerRadius;
+            for (let i = 0; i < blocksAABB.length; i++) {
+                let box = blocksAABB[i];
+                if (pMaxX > box.min.x + 0.01 && pMinX < box.max.x - 0.01 && pMaxZ > box.min.z + 0.01 && pMinZ < box.max.z - 0.01) {
+                    if (playerPos.y >= box.max.y - groundEpsilon && playerPos.y <= box.max.y + groundEpsilon) { isGrounded = true; playerPos.y = box.max.y; playerVel.y = 0; break; }
+                }
+            }
+
+            if (isGrounded) {
+                if (keys.space) {
+                    playerVel.y = JUMP_FORCE;
+                    isGrounded = false;
+                    PM_Accelerate(wishDir, 30, AIR_ACCEL, dt);
+                    jumpCount++;
+                    syncHud.innerText = jumpCount;
+
+                    // GATILHO DE ECONOMIA: Moeda por Pulo
+                    Economia.adicionarMoedas(0.05);
+                    window.mostrarGanhoAstro(0.05);
+                }
+                else {
+                    PM_Friction(dt, wishDir.lengthSq() > 0);
+                    PM_Accelerate(wishDir, MAX_SPEED, ACCEL, dt);
+                    let horizSpeed = Math.sqrt(playerVel.x ** 2 + playerVel.z ** 2);
+                    if (horizSpeed > MAX_SPEED) { let ratio = MAX_SPEED / horizSpeed; playerVel.x *= ratio; playerVel.z *= ratio; }
+                }
+            } else {
+                playerVel.y -= GRAVITY * dt;
+                PM_Accelerate(wishDir, 30, AIR_ACCEL, dt);
+            }
+
+            let currentTotalSpeed = Math.sqrt(playerVel.x ** 2 + playerVel.z ** 2);
+            if (currentTotalSpeed > HARD_SPEED_LIMIT) { let limitRatio = HARD_SPEED_LIMIT / currentTotalSpeed; playerVel.x *= limitRatio; playerVel.z *= limitRatio; }
+            playerPos.y += playerVel.y * dt; collideAndSlide('y'); playerPos.x += playerVel.x * dt; collideAndSlide('x'); playerPos.z += playerVel.z * dt; collideAndSlide('z');
+
+            if (playerPos.y < -150) {
+                playerPos.copy(spawnPos);
+                playerVel.set(0, 0, 0);
+                jumpCount = 0;
+                syncHud.innerText = "0";
+            }
+        }
+
+        // INICIALIZAÇÃO HUD ECONOMIA E TRACKER
+        Economia.atualizarHUD();
+        Inventario.atualizarHUD();
+        AstroTracker.init();
+        AstroTracker.iniciarGanhoPassivo();
+
+        // ESCUTA EVENTO DE TROCA DE SKIN PARA ATUALIZAR VIEWMODEL EM TEMPO REAL
+        window.addEventListener('skinAlterada', () => {
+            viewmodel.loadRealisticModels();
+        });
+
+        // ==========================================
+        // 5. LOOP DE RENDERIZAÇÃO
+        // ==========================================
+        let prevTime = performance.now();
+        function formatTime(ms) { let totalSeconds = ms / 1000; let minutes = Math.floor(totalSeconds / 60); let seconds = Math.floor(totalSeconds % 60); let milliseconds = Math.floor((totalSeconds % 1) * 100); return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`; }
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now();
+            let frameTime = (time - prevTime) / 1000;
+            prevTime = time;
+            if (isPlaying) {
+                timerHud.innerText = formatTime(time - startTime);
+                physicsAccumulator += frameTime;
+                while (physicsAccumulator >= TICK_DT) {
+                    physicsStep(TICK_DT);
+                    physicsAccumulator -= TICK_DT;
+                }
+                camera.position.set(playerPos.x, playerPos.y + playerHeight, playerPos.z);
+                const horizontalSpeed = Math.floor(Math.sqrt(playerVel.x ** 2 + playerVel.z ** 2) * 10);
+                speedHud.innerText = horizontalSpeed;
+                viewmodel.updateSway(playerVel, isGrounded);
+            }
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        animate();
+    </script>
+</body>
+</html>

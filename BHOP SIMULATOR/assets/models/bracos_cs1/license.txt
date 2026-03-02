@@ -1,0 +1,11 @@
+Model Information:
+* title:	Counter-Strike: Source Viewmodel Hands
+* source:	https://sketchfab.com/3d-models/counter-strike-source-viewmodel-hands-287db333c93a44fb9d9d142b3f9c760d
+* author:	slop_face228 (https://sketchfab.com/slop_face228)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Counter-Strike: Source Viewmodel Hands" (https://sketchfab.com/3d-models/counter-strike-source-viewmodel-hands-287db333c93a44fb9d9d142b3f9c760d) by slop_face228 (https://sketchfab.com/slop_face228) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
