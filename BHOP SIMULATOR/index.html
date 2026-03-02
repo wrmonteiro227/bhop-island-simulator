@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -415,7 +415,7 @@
         scene.add(sunLight);
 
         // ==========================================
-        // 2. ARQUITETURA VIEWMODEL (LÓGICA INDIVIDUALIZADA POR EXTENSÃO)
+        // 2. ARQUITETURA VIEWMODEL (INJEÇÃO DE GLTF - CONSOLIDADO)
         // ==========================================
         class Viewmodel {
             constructor(camera) {
@@ -446,16 +446,16 @@
                     skinPath,
                     (gltf) => {
                         this.currentModel = gltf.scene;
-                        
-                        // LÓGICA DE INDIVIDUALISMO DE POSIÇÃO
-                        if (skinPath.toLowerCase().endsWith('.glb')) {
-                            // Parâmetros específicos para braços em formato .glb
-                            const scaleFix = 0.02; 
+
+                        // --- LÓGICA DE INDIVIDUALISMO POR PASTA (BRAC_CS1 VS BRAC_CS2) ---
+                        if (skinPath.includes('bracos_cs2')) {
+                            // Ajustes específicos para o Braço Secundário (.gltf na pasta cs2)
+                            const scaleFix = 1.0;
                             this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
-                            this.currentModel.rotation.set(-0.1, Math.PI, 0);
-                            this.currentModel.position.set(0.2, -0.8, 1.8);
+                            this.currentModel.position.set(0.1, -1.2, 0.8);
+                            this.currentModel.rotation.set(0, Math.PI, 0);
                         } else {
-                            // Parâmetros consolidados para braços em formato .gltf
+                            // Ajustes consolidados para o Braço Principal (Pasta cs1 ou padrão)
                             const scaleFix = 0.5;
                             this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
                             this.currentModel.rotation.x = -0.15;
@@ -468,6 +468,7 @@
                             if (child.isMesh) {
                                 child.castShadow = true;
                                 child.receiveShadow = true;
+                                child.frustumCulled = false; // Garante renderização em escalas diferentes
                                 if (child.material) {
                                     child.material.side = THREE.DoubleSide;
                                     child.material.depthTest = true;
