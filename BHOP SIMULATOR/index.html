@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -436,7 +436,7 @@
             loadRealisticModels() {
                 const gltfLoader = new GLTFLoader();
 
-                // Determina qual modelo carregar baseado no sistema de equipamentos
+                // Puxa o arquivo equipado no inventário (seja bracos_cs1 ou bracos_cs2)
                 const skinPath = localStorage.getItem('astro_skin_equipada') || './assets/models/bracos_cs1/scene.gltf';
 
                 // Remove modelo antigo para evitar sobreposição
@@ -446,32 +446,17 @@
                     skinPath,
                     (gltf) => {
                         this.currentModel = gltf.scene;
-
-                        // --- LÓGICA DE INDIVIDUALISMO POR PASTA (BRAC_CS1 VS BRAC_CS2) ---
-                        if (skinPath.includes('bracos_cs2')) {
-                            // Ajustes específicos para o Braço Secundário (.gltf na pasta cs2)
-                            const scaleFix = 0.5;
-                            this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
-                            this.currentModel.rotation.x = -0.15;
-                            this.currentModel.rotation.y = Math.PI;
-                            this.currentModel.rotation.z = 0;
-                            this.currentModel.position.set(0.0, -0.6, 2.5);
-                        }
-                        } else {
-                            // Ajustes consolidados para o Braço Principal (Pasta cs1 ou padrão)
-                            const scaleFix = 0.5;
-                            this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
-                            this.currentModel.rotation.x = -0.15;
-                            this.currentModel.rotation.y = Math.PI;
-                            this.currentModel.rotation.z = 0;
-                            this.currentModel.position.set(0.0, -0.6, 2.5);
-                        }
+                        const scaleFix = 0.5;
+                        this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
+                        this.currentModel.rotation.x = -0.15;
+                        this.currentModel.rotation.y = Math.PI;
+                        this.currentModel.rotation.z = 0;
+                        this.currentModel.position.set(0.0, -0.6, 2.5);
 
                         this.currentModel.traverse((child) => {
                             if (child.isMesh) {
                                 child.castShadow = true;
                                 child.receiveShadow = true;
-                                child.frustumCulled = false; // Garante renderização em escalas diferentes
                                 if (child.material) {
                                     child.material.side = THREE.DoubleSide;
                                     child.material.depthTest = true;
@@ -907,6 +892,4 @@
         animate();
     </script>
 </body>
-
 </html>
-
