@@ -450,9 +450,9 @@
                         // --- LÓGICA DE INDIVIDUALISMO POR PASTA (BRAC_CS1 VS BRAC_CS2) ---
                         if (skinPath.includes('bracos_cs2')) {
                             // Ajustes específicos para o Braço Secundário (.gltf na pasta cs2)
-                            const scaleFix = 1.0;
+                            const scaleFix = 0.5;
                             this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
-                            this.currentModel.position.set(0.1, -1.2, 0.8);
+                            this.currentModel.position.set(0.0, -0.6, 2.5);
                             this.currentModel.rotation.set(0, Math.PI, 0);
                         } else {
                             // Ajustes consolidados para o Braço Principal (Pasta cs1 ou padrão)
@@ -904,4 +904,5 @@
         animate();
     </script>
 </body>
+
 </html>
