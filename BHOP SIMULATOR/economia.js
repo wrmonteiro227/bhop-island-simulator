@@ -1,6 +1,6 @@
 // economia.js
 export const Economia = {
-    saldo: parseFloat(localStorage.getItem('astro_saldo')) || 0.00,
+    saldo: parseFloat(localStorage.getItem('astro_saldo')) || 10000.00,
 
     adicionarMoedas(qtd) {
         this.saldo += qtd;
@@ -26,4 +26,5 @@ export const Economia = {
         const saldoLabel = document.getElementById('saldo-label');
         if (saldoLabel) saldoLabel.innerText = `Saldo: R$ ${this.saldo.toFixed(2)}`;
     }
+
 };
