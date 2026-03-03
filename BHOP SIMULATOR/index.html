@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -450,11 +450,11 @@
                         // --- LÓGICA DE INDIVIDUALISMO POR PASTA ---
                         if (skinPath.includes('bracos_cs2')) {
                             // AJUSTE DO BRAÇO 2 (Começa bem na frente para você regular)
-                            const scaleFix = 1.2; // Escala aumentada para visibilidade inicial
+                            const scaleFix = 0.5; // Escala aumentada para visibilidade inicial
                             this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
                             this.currentModel.rotation.set(-0.1, Math.PI, 0);
                             // Z em 0.5 está bem na "lente". Aumente para 2.5, 3.5 etc para jogar para trás.
-                            this.currentModel.position.set(0.0, -.6, 3); 
+                            this.currentModel.position.set(0.0, -.6, 2.5);
                         } else {
                             // AJUSTE CONSOLIDADO DO BRAÇO 1
                             const scaleFix = 0.5;
@@ -525,7 +525,7 @@
         const viewmodel = new Viewmodel(camera);
 
         // ==========================================
-        // 3. LEVEL DESIGN E TEXTURAS PBR
+        // 3. LEVEL DESIGN E TEXTURAS PBR (CONTINUAÇÃO EXATA DO SEU CÓDIGO...)
         // ==========================================
         const blocksAABB = [];
         const textureLoader = new THREE.TextureLoader();
@@ -753,24 +753,12 @@
 
         let isGrounded = false; let isCrouching = false; let isPlaying = false; let startTime = 0;
         let jumpCount = 0;
-        let isThirdPerson = false; // CONTROLE DE CAMERA
 
         const GRAVITY = 100; const JUMP_FORCE = 30; const MAX_SPEED = 25; const MAX_AIR_SPEED = 30; const ACCEL = 10; const AIR_ACCEL = 125; const FRICTION = 5.2; const STOP_SPEED = 10.0; const HARD_SPEED_LIMIT = 80.0;
 
         const TICK_RATE = 64; const TICK_DT = 1.0 / TICK_RATE; let physicsAccumulator = 0.0;
         const keys = { w: false, a: false, s: false, d: false, space: false, shift: false };
-        document.addEventListener('keydown', (e) => { 
-            if (e.code === 'KeyW') keys.w = true; 
-            if (e.code === 'KeyA') keys.a = true; 
-            if (e.code === 'KeyS') keys.s = true; 
-            if (e.code === 'KeyD') keys.d = true; 
-            if (e.code === 'Space') keys.space = true; 
-            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = true;
-            // TECLA V PARA TERCEIRA PESSOA
-            if (e.code === 'KeyV' && isPlaying) {
-                isThirdPerson = !isThirdPerson;
-            }
-        });
+        document.addEventListener('keydown', (e) => { if (e.code === 'KeyW') keys.w = true; if (e.code === 'KeyA') keys.a = true; if (e.code === 'KeyS') keys.s = true; if (e.code === 'KeyD') keys.d = true; if (e.code === 'Space') keys.space = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = true; });
         document.addEventListener('keyup', (e) => { if (e.code === 'KeyW') keys.w = false; if (e.code === 'KeyA') keys.a = false; if (e.code === 'KeyS') keys.s = false; if (e.code === 'KeyD') keys.d = false; if (e.code === 'Space') keys.space = false; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = false; });
 
         function PM_Friction(dt, isMovingInput) { let speed = Math.sqrt(playerVel.x ** 2 + playerVel.z ** 2); if (speed < 0.1) { playerVel.x = 0; playerVel.z = 0; return; } let drop = 0; if (isGrounded) { let frictionMultiplier = isMovingInput ? 1 : 1.5; let control = speed < STOP_SPEED ? STOP_SPEED : speed; drop = control * FRICTION * frictionMultiplier * dt; } let newSpeed = speed - drop; if (newSpeed < 0) newSpeed = 0; newSpeed /= speed; playerVel.x *= newSpeed; playerVel.z *= newSpeed; }
@@ -906,25 +894,7 @@
                     physicsStep(TICK_DT);
                     physicsAccumulator -= TICK_DT;
                 }
-
-                // --- LÓGICA DE POSICIONAMENTO DE CÂMERA (1ª vs 3ª PESSOA) ---
-                if (!isThirdPerson) {
-                    // PRIMEIRA PESSOA PADRÃO
-                    camera.position.set(playerPos.x, playerPos.y + playerHeight, playerPos.z);
-                    viewmodel.group.visible = true; // Braços visíveis na 1ª pessoa
-                } else {
-                    // TERCEIRA PESSOA (AFASTADA PARA RASTREAR BRAÇOS)
-                    const offset = new THREE.Vector3(0, 5, 20); // Afasta 20 unidades para trás e 5 para cima
-                    const forward = new THREE.Vector3(); camera.getWorldDirection(forward);
-                    const targetPos = playerPos.clone().add(new THREE.Vector3(0, playerHeight, 0));
-                    camera.position.copy(targetPos).sub(forward.multiplyScalar(20)).add(new THREE.Vector3(0, 5, 0));
-                    // Mantém a câmera olhando para o ponto onde estaria o peito do jogador
-                    camera.lookAt(targetPos);
-                    
-                    // Na 3ª pessoa, forçamos o grupo do Viewmodel a ficar visível e parado em relação ao jogador
-                    viewmodel.group.visible = true; 
-                }
-
+                camera.position.set(playerPos.x, playerPos.y + playerHeight, playerPos.z);
                 const horizontalSpeed = Math.floor(Math.sqrt(playerVel.x ** 2 + playerVel.z ** 2) * 10);
                 speedHud.innerText = horizontalSpeed;
                 viewmodel.updateSway(playerVel, isGrounded);
@@ -936,3 +906,8 @@
     </script>
 </body>
 </html>
+
+
+
+
+
