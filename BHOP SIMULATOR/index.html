@@ -450,11 +450,11 @@
                         // --- LÓGICA DE INDIVIDUALISMO POR PASTA ---
                         if (skinPath.includes('bracos_cs2')) {
                             // CORREÇÃO BRAÇO 2: Ajuste de escala e Z reduzido para não sumir atrás da câmera
-                            const scaleFix = 0.45; 
+                            const scaleFix = 4; 
                             this.currentModel.scale.set(scaleFix, scaleFix, scaleFix);
                             this.currentModel.rotation.set(0, Math.PI, 0); 
                             // Z em -1.2 traz o modelo para a frente do sensor da câmera.
-                            this.currentModel.position.set(0.0, -0.6, -1.2); 
+                            this.currentModel.position.set(0.0, -0.6, 3); 
                         } else {
                             // AJUSTE CONSOLIDADO DO BRAÇO 1
                             const scaleFix = 0.5;
